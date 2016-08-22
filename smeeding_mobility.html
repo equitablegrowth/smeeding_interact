@@ -1,0 +1,225 @@
+<!-- smeeding_mobility.html -->
+
+<html>
+
+<head>
+	<title>Smeeding income/wealth  mobility</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.4.1/snap.svg-min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+	<style>
+		@import url(https://fonts.googleapis.com/css?family=Lato:400,700);
+		body{margin:120 0 400 90;}
+		.subconstraint{max-width:690px;text-align:center;}
+		.constraint{max-width:690px;}
+		.hed{font-family:'Lato';font-size:22px;font-weight:700;}
+		.dek{font-family:'Lato';font-size:17px;margin-bottom:20px;}
+		.note{font-family:'Lato';font-size:11px;margin-top:20px;line-height:1.1;}
+}
+	</style>
+
+</head>
+
+<body>
+	<div class='constraint'>
+		<div class='hed'>Placeholder the headline for this interactive goes here</div>
+		<div class='dek'>Placeholder this interactive shows you the difference between income mobility and wealth mobility</div>
+
+		<svg id="smeeding" viewbox='0,-20,690,770' ></svg>
+	</div>
+
+</body>
+
+<script defer>
+var smeeding = Snap('#smeeding')
+var gutter = 110
+var height = 700
+var tb_gutter = 90
+var min_width = 2
+var max_width = 60
+var min_data=2
+var max_data=53
+var selected=1
+
+var smeeding_data={
+	'income':{1:{5:3,4:4,3:14,2:28,1:51},2:{1:27,2:29,3:25,4:14,5:5},3:{1:10,2:21,3:27,4:30,5:12},4:{1:7,2:15,3:21,4:30,5:27},5:{1:3,2:8,3:14,4:22,5:53}},
+	'wealth':{1:{1:46,2:32,3:14,4:5,5:3},2:{1:27,2:33,3:25,4:13,5:4},3:{1:16,2:22,3:33,4:22,5:6},4:{1:7,2:9,3:19,4:39,5:25},5:{1:3,2:4,3:8,4:21,5:64}}
+}
+
+smeeding_setup()
+smeeding_lines()
+smeeding_select_start(1)
+
+function smeeding_setup(){
+	// year headers
+	smeeding.text(gutter,20,'1999').attr({'text-decoration':'underline','text-anchor':'end','font-family':'Lato','font-size':'1.2em'})
+	smeeding.text(690-gutter,20,'2013').attr({'text-decoration':'underline','text-anchor':'start','font-family':'Lato','font-size':'1.2em'})
+
+	// key
+	smeeding.rect(210,-20,15,15).attr({fill:'#f58c63','shape-rendering':'crispEdges'})
+	smeeding.text(235,-7,'Income mobility').attr({'font-family':'Lato'})
+	smeeding.rect(360,-20,15,15).attr({fill:'#67c2a5','shape-rendering':'crispEdges',opacity:.5})
+	smeeding.text(385,-7,'Wealth mobility').attr({'font-family':'Lato'})
+
+	// quintile labels
+	var smed=smeeding.text(gutter/2+10,tb_gutter+(0*(height-20-tb_gutter)/4-8),['Richest', 'quintile']).attr({'startquint':5,'text-anchor':'middle','font-family':'Lato','font-size':'1em','cursor':'pointer',opacity:.2})
+	smed.selectAll("tspan:not(:first-child)").attr({x:smed.attr('x'),dy:'1em'})
+	var smed=smeeding.text(gutter/2+10,tb_gutter+(1*(height-20-tb_gutter)/4-8),['4th', 'quintile']).attr({'startquint':4,'text-anchor':'middle','font-family':'Lato','font-size':'1em','cursor':'pointer',opacity:.2})
+	smed.selectAll("tspan:not(:first-child)").attr({x:smed.attr('x'),dy:'1em'})
+	var smed=smeeding.text(gutter/2+10,tb_gutter+(2*(height-20-tb_gutter)/4-8),['3rd', 'quintile']).attr({'startquint':3,'text-anchor':'middle','font-family':'Lato','font-size':'1em','cursor':'pointer',opacity:.2})
+	smed.selectAll("tspan:not(:first-child)").attr({x:smed.attr('x'),dy:'1em'})
+	var smed=smeeding.text(gutter/2+10,tb_gutter+(3*(height-20-tb_gutter)/4-8),['2nd', 'quintile']).attr({'startquint':2,'text-anchor':'middle','font-family':'Lato','font-size':'1em','cursor':'pointer',opacity:.2})
+	smed.selectAll("tspan:not(:first-child)").attr({x:smed.attr('x'),dy:'1em'})
+	var smed=smeeding.text(gutter/2+10,tb_gutter+(4*(height-20-tb_gutter)/4-8),['Poorest', 'quintile']).attr({'startquint':1,'text-anchor':'middle','font-family':'Lato','font-size':'1em','cursor':'pointer',opacity:.2})
+	smed.selectAll("tspan:not(:first-child)").attr({x:smed.attr('x'),dy:'1em'})
+
+	smeeding.text(690-gutter,tb_gutter+(0*(height-20-tb_gutter)/4),'Richest quintile').attr({'text-anchor':'start','font-family':'Lato','font-size':'1em','cursor':'pointer',opacity:1})
+	smeeding.text(690-gutter,tb_gutter+(1*(height-20-tb_gutter)/4),'4th quintile').attr({'text-anchor':'start','font-family':'Lato','font-size':'1em','cursor':'pointer',opacity:1})
+	smeeding.text(690-gutter,tb_gutter+(2*(height-20-tb_gutter)/4),'3rd quintile').attr({'text-anchor':'start','font-family':'Lato','font-size':'1em','cursor':'pointer',opacity:1})
+	smeeding.text(690-gutter,tb_gutter+(3*(height-20-tb_gutter)/4),'2nd quintile').attr({'text-anchor':'start','font-family':'Lato','font-size':'1em','cursor':'pointer',opacity:1})
+	smeeding.text(690-gutter,tb_gutter+(4*(height-20-tb_gutter)/4),'Poorest quintile').attr({'text-anchor':'start','font-family':'Lato','font-size':'1em','cursor':'pointer',opacity:1})
+
+	// button outlines
+	var temp=smeeding.rect(22,61,87,47).attr({'stroke-width':1,'stroke':'black',fill:'none','shape-rendering':'crispEdges',opacity:.2,'startquint':5,cursor:'pointer','pointer-events':'visibleFill'})
+	temp.hover(rectfocus,rectunfocus)
+	temp.click(clickedbutton)
+	var temp=smeeding.rect(22,209,87,47).attr({'stroke-width':1,'stroke':'black',fill:'none','shape-rendering':'crispEdges',opacity:.2,'startquint':4,cursor:'pointer','pointer-events':'visibleFill'})
+	temp.hover(rectfocus,rectunfocus)
+	temp.click(clickedbutton)
+	var temp=smeeding.rect(22,357,87,47).attr({'stroke-width':1,'stroke':'black',fill:'none','shape-rendering':'crispEdges',opacity:.2,'startquint':3,cursor:'pointer','pointer-events':'visibleFill'})
+	temp.hover(rectfocus,rectunfocus)
+	temp.click(clickedbutton)
+	var temp=smeeding.rect(22,504,87,47).attr({'stroke-width':1,'stroke':'black',fill:'none','shape-rendering':'crispEdges',opacity:.2,'startquint':2,cursor:'pointer','pointer-events':'visibleFill'})
+	temp.hover(rectfocus,rectunfocus)
+	temp.click(clickedbutton)
+	var temp=smeeding.rect(22,652,87,47).attr({'stroke-width':1,'stroke':'black',fill:'none','shape-rendering':'crispEdges',opacity:.2,'startquint':1,cursor:'pointer','pointer-events':'visibleFill'})
+	temp.hover(rectfocus,rectunfocus)
+	temp.click(clickedbutton)
+}
+
+function rectfocus(ev){
+	var target=Snap(ev.target)
+	var quint=target.attr('startquint')
+	if(selected!=quint){
+		target.attr({opacity:.6})
+		smeeding.select("text[startquint='"+quint+"']").attr({opacity:.6})
+	}
+}
+
+function rectunfocus(ev){
+	var target=Snap(ev.target)
+	var quint=target.attr('startquint')
+	if(selected!=quint){
+		target.attr({opacity:.2})
+		smeeding.select("text[startquint='"+quint+"']").attr({opacity:.2})
+	}
+}
+
+function smeeding_lines(){
+	for(var start_quint in smeeding_data['income']){
+		var income_yoffset=65
+		var income_width=0
+		var wealth_yoffset=45
+		var wealth_width=0
+
+		for(var end_quint in smeeding_data['income'][start_quint]){
+			var income_width=smeed_width(smeeding_data['income'][start_quint][end_quint])
+			var wealth_width=smeed_width(smeeding_data['wealth'][start_quint][end_quint])
+			
+			income_yoffset=income_yoffset-income_width/2
+			wealth_yoffset=wealth_yoffset-wealth_width/2
+
+			var start_y=income_yoffset+tb_gutter+((5-start_quint)*(height-20-tb_gutter)/4)
+			var end_y=tb_gutter+((5-end_quint)*(height-20-tb_gutter)/4)+income_width/2-5
+
+			var wstart_y=wealth_yoffset+tb_gutter+((5-start_quint)*(height-20-tb_gutter)/4)
+			var wend_y=end_y-income_width/2-wealth_width/2
+
+			income_yoffset=income_yoffset-income_width/2
+			wealth_yoffset=wealth_yoffset-wealth_width/2
+
+			var income_path='M'+(gutter+15)+','+(start_y-5)+' L'+(gutter+65)+','+(start_y-5)
+			var wealth_path='M'+(gutter+15)+','+(wstart_y-5)+' L'+(gutter+65)+','+(wstart_y-5)
+
+			// curve
+			income_path=income_path+'C'+'400'+','+(start_y-5)+' '+'200'+','+(end_y)+' '+(690-gutter-15)+','+(end_y)
+			wealth_path=wealth_path+'C'+'400'+','+(wstart_y-5)+' '+'200'+','+(wend_y)+' '+(690-gutter-15)+','+(wend_y)
+
+			// income
+			smeeding.path(income_path).attr({fill:'none','stroke-width':income_width,'stroke':'#e5e5e5','startquint':start_quint,'endquint':end_quint,type:'background',opacity:.3})
+			smeeding.path(income_path).attr({fill:'none','stroke-width':0,'end-width':income_width,'stroke':'#f58c63','startquint':start_quint,'endquint':end_quint,type:'overlay',opacity:1,value:smeeding_data['income'][start_quint][end_quint]})
+		
+			// wealth
+			// smeeding.path(wealth_path).attr({fill:'none','stroke-width':wealth_width,'stroke':'#e5e5e5','startquint':start_quint,'endquint':end_quint,type:'background'})
+			smeeding.path(wealth_path).attr({fill:'none','stroke-width':0,'end-width':wealth_width,'stroke':'#67c2a5','startquint':start_quint,'endquint':end_quint,type:'overlay',type2:'overlay2',opacity:.5,value:smeeding_data['wealth'][start_quint][end_quint]})
+
+			// text labels
+			smeeding.text(690-gutter-15,end_y+income_width/2+15,smeeding_data['income'][start_quint][end_quint]+'%').attr({'font-family':'Lato','font-size':'.9em','text-anchor':'end','textquint':start_quint,opacity:0})
+			smeeding.text(690-gutter-15,wend_y-wealth_width/2-4,smeeding_data['wealth'][start_quint][end_quint]+'%').attr({'font-family':'Lato','font-size':'.9em','text-anchor':'end','textquint':start_quint,opacity:0})
+		}
+	}
+
+	smeeding.selectAll("[type='overlay']").forEach(function(overlay){
+		smeeding.append(overlay)
+	})
+
+	smeeding.selectAll("[type2='overlay2']").forEach(function(overlay){
+		smeeding.append(overlay)
+	})
+
+	smeeding.selectAll("[textquint]").forEach(function(overlay){
+		smeeding.append(overlay)
+	})
+}
+
+function clickedbutton(ev){
+	var target=Snap(ev.target)
+	var quint=target.attr('startquint')
+	smeeding_select_start(quint)
+}
+
+function smeeding_select_start(start_quint){
+	selected=start_quint
+	smeeding.selectAll("text[startquint]").forEach(function(text){
+		if(text.attr('startquint')==start_quint){
+			text.animate({opacity:1},2000)
+		} else {
+			text.animate({opacity:.2},2000)
+		}
+	})
+
+	smeeding.selectAll("rect[startquint]").forEach(function(text){
+		if(text.attr('startquint')==start_quint){
+			text.animate({opacity:1},2000)
+		} else {
+			text.animate({opacity:.2},2000)
+		}
+	})
+
+	smeeding.selectAll("text[textquint]").forEach(function(text){
+		if(text.attr('textquint')==start_quint){
+			text.animate({opacity:.6},2000)
+		} else {
+			text.animate({opacity:0},2000)
+		}
+	})
+
+	smeeding.selectAll("path[type='overlay'][startquint]").forEach(function(path){
+		if(path.attr('startquint')!=start_quint){
+			path.animate({'stroke-width':0},2000)
+		} else {
+			path.animate({'stroke-width':path.attr('end-width')},2000)
+		}
+	})
+
+	// expand new
+	smeeding.selectAll("path[type='overlay'][startquint='"+start_quint+"']").forEach(function(path){
+	})
+}
+
+function smeed_width(value){
+	return min_width+(value/(max_data-min_data)*(max_width-min_width))
+}
+
+</script>
+</html>
