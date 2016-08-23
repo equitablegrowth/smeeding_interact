@@ -9,13 +9,9 @@
 
 	<style>
 		@import url(https://fonts.googleapis.com/css?family=Lato:400,700);
-		body{margin:120 0 400 90;}
-		.subconstraint{max-width:690px;text-align:center;}
-		.constraint{max-width:690px;}
 		.hed{font-family:'Lato';font-size:22px;font-weight:700;}
 		.dek{font-family:'Lato';font-size:17px;margin-bottom:20px;}
 		.note{font-family:'Lato';font-size:11px;margin-top:20px;line-height:1.1;}
-}
 	</style>
 
 </head>
@@ -147,11 +143,15 @@ function smeeding_lines(){
 
 			// income
 			smeeding.path(income_path).attr({fill:'none','stroke-width':income_width,'stroke':'#e5e5e5','startquint':start_quint,'endquint':end_quint,type:'background',opacity:.3})
-			smeeding.path(income_path).attr({fill:'none','stroke-width':0,'end-width':income_width,'stroke':'#f58c63','startquint':start_quint,'endquint':end_quint,type:'overlay',opacity:1,value:smeeding_data['income'][start_quint][end_quint]})
-		
+			var temp=smeeding.path(income_path).attr({fill:'none','stroke-width':income_width,'end-width':income_width,'stroke':'#f58c63','startquint':start_quint,'endquint':end_quint,type:'overlay',opacity:1,value:smeeding_data['income'][start_quint][end_quint]})
+			var length=temp.getTotalLength()
+			temp.attr({'stroke-dashoffset':length,'stroke-dasharray':length,length:length})
+
 			// wealth
 			// smeeding.path(wealth_path).attr({fill:'none','stroke-width':wealth_width,'stroke':'#e5e5e5','startquint':start_quint,'endquint':end_quint,type:'background'})
-			smeeding.path(wealth_path).attr({fill:'none','stroke-width':0,'end-width':wealth_width,'stroke':'#67c2a5','startquint':start_quint,'endquint':end_quint,type:'overlay',type2:'overlay2',opacity:.5,value:smeeding_data['wealth'][start_quint][end_quint]})
+			var temp=smeeding.path(wealth_path).attr({fill:'none','stroke-width':wealth_width,'end-width':wealth_width,'stroke':'#67c2a5','startquint':start_quint,'endquint':end_quint,type:'overlay',type2:'overlay2',opacity:.5,value:smeeding_data['wealth'][start_quint][end_quint]})
+			var length=temp.getTotalLength()
+			temp.attr({'stroke-dashoffset':length,'stroke-dasharray':length,length:length})
 
 			// text labels
 			smeeding.text(690-gutter-15,end_y+income_width/2+15,smeeding_data['income'][start_quint][end_quint]+'%').attr({'font-family':'Lato','font-size':'.9em','text-anchor':'end','textquint':start_quint,opacity:0})
@@ -200,15 +200,17 @@ function smeeding_select_start(start_quint){
 		if(text.attr('textquint')==start_quint){
 			text.animate({opacity:.6},2000)
 		} else {
-			text.animate({opacity:0},2000)
+			text.animate({opacity:0},1000)
 		}
 	})
 
 	smeeding.selectAll("path[type='overlay'][startquint]").forEach(function(path){
 		if(path.attr('startquint')!=start_quint){
-			path.animate({'stroke-width':0},2000)
+			// path.animate({'stroke-width':0},2000)
+			path.animate({'stroke-dashoffset':path.attr('length')},2000)
 		} else {
-			path.animate({'stroke-width':path.attr('end-width')},2000)
+			// path.animate({'stroke-width':path.attr('end-width')},2000)
+			path.animate({'stroke-dashoffset':0},2000)
 		}
 	})
 
